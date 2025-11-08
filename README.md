@@ -1,6 +1,6 @@
 # 电子书转换器 (Ebook Converter)
 
-**Language / 语言**: [English](README.rst) | [中文](README-CN.md)
+**Language / 语言**: [English](README-EN.rst) | [中文](README.md)
 
 ---
 

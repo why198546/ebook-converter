@@ -2,7 +2,7 @@
 Ebook converter
 ===============
 
-**Language / 语言**: `English <README.rst>`_ | `中文 <README-CN.md>`_
+**Language / 语言**: `English <README-EN.rst>`_ | `中文 <README.md>`_
 
 ---
 
