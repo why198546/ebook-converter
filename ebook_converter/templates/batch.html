@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>批量转换 - 电子书格式转换器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background-color: #f8f9ff;
+        }
+
+        .upload-area.dragover {
+            background-color: #e8ebff;
+            border-color: #764ba2;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .selected-files {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .file-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .file-item {
+            padding: 8px;
+            margin: 5px 0;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .remove-file {
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .format-selector {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .convert-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .convert-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .convert-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-item {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-item.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result-item.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-info {
+            margin-top: 10px;
+            color: #667eea;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 批量电子书转换</h1>
+        <p class="subtitle">一次性转换多个文件</p>
+        
+        <div class="nav-links">
+            <a href="/">单文件转换</a>
+            <a href="/batch">批量转换</a>
+        </div>
+
+        <form id="batchForm" enctype="multipart/form-data">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <p>点击选择多个文件或拖拽文件到此处</p>
+                <input type="file" id="fileInput" name="files[]" class="file-input" multiple>
+                
+                <div class="selected-files" id="selectedFiles" style="display: none;">
+                    <h3>已选择的文件:</h3>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+            </div>
+
+            <div class="format-selector">
+                <label for="outputFormat">选择输出格式:</label>
+                <select id="outputFormat" name="output_format" required>
+                    {% for ext, desc in output_formats.items() %}
+                    <option value="{{ ext }}" {% if ext == 'pdf' %}selected{% endif %}>{{ desc }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="convert-btn" id="convertBtn" disabled>
+                开始批量转换
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在批量转换中...</p>
+            <p class="progress-info" id="progressInfo"></p>
+        </div>
+
+        <div class="results" id="results">
+            <h3>转换结果:</h3>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const selectedFiles = document.getElementById('selectedFiles');
+        const fileList = document.getElementById('fileList');
+        const convertBtn = document.getElementById('convertBtn');
+        const batchForm = document.getElementById('batchForm');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const resultsList = document.getElementById('resultsList');
+        const outputFormat = document.getElementById('outputFormat');
+        const progressInfo = document.getElementById('progressInfo');
+
+        let filesArray = [];
+
+        uploadArea.addEventListener('click', (e) => {
+            if (e.target !== uploadArea && !uploadArea.contains(e.target)) return;
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            addFiles(Array.from(e.target.files));
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            addFiles(Array.from(e.dataTransfer.files));
+        });
+
+        function addFiles(newFiles) {
+            filesArray = [...filesArray, ...newFiles];
+            updateFileList();
+            checkFormReady();
+        }
+
+        function removeFile(index) {
+            filesArray.splice(index, 1);
+            updateFileList();
+            checkFormReady();
+        }
+
+        function updateFileList() {
+            if (filesArray.length === 0) {
+                selectedFiles.style.display = 'none';
+                return;
+            }
+
+            selectedFiles.style.display = 'block';
+            fileList.innerHTML = '';
+            
+            filesArray.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>${file.name}</span>
+                    <button type="button" class="remove-file" onclick="removeFile(${index})">删除</button>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        outputFormat.addEventListener('change', checkFormReady);
+
+        function checkFormReady() {
+            if (filesArray.length > 0 && outputFormat.value) {
+                convertBtn.disabled = false;
+            } else {
+                convertBtn.disabled = true;
+            }
+        }
+
+        batchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            results.classList.remove('show');
+            resultsList.innerHTML = '';
+            loading.classList.add('show');
+            convertBtn.disabled = true;
+
+            const formData = new FormData();
+            filesArray.forEach(file => {
+                formData.append('files[]', file);
+            });
+            formData.append('output_format', outputFormat.value);
+
+            progressInfo.textContent = `处理中: 0 / ${filesArray.length}`;
+
+            try {
+                const response = await fetch('/batch-convert', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    displayResults(data.results);
+                }
+            } catch (error) {
+                alert('批量转换时出错: ' + error.message);
+            } finally {
+                loading.classList.remove('show');
+                checkFormReady();
+            }
+        });
+
+        function displayResults(resultsData) {
+            results.classList.add('show');
+            resultsList.innerHTML = '';
+
+            resultsData.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = `result-item ${result.status}`;
+                
+                let content = `<strong>${result.filename}</strong>`;
+                if (result.status === 'success') {
+                    content += ` - ${result.message}`;
+                } else {
+                    content += ` - 错误: ${result.message}`;
+                }
+                
+                resultItem.innerHTML = content;
+                resultsList.appendChild(resultItem);
+            });
+        }
+
+        // Make removeFile globally accessible
+        window.removeFile = removeFile;
+    </script>
+</body>
+</html>
