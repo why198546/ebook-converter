@@ -9,6 +9,14 @@ My motivation is to have only the converter for ebooks run from the
 commandline, without all of those bells and whistles Calibre has, and with
 cleanest more *pythonic* approach.
 
+**New Features:**
+
+- 🌐 **Web Interface** - User-friendly web UI for single and batch conversions
+- 📄 **PDF Output Support** - Convert ebooks to PDF with full Chinese font support (Kaiti)
+- 🎨 **Enhanced PDF Formatting** - Preserves colors, text alignment, indentation, and font styles from CSS
+- 🇨🇳 **Chinese Filename Support** - Properly handles Unicode filenames in downloads
+- 🚀 **Background Service** - Easy-to-use service management with ``ebook-convert``, ``ebook-stop`` commands
+
 Requirements
 ------------
 
@@ -27,12 +35,14 @@ and several Python packages:
 - `beautifulsoup4`_
 - `css-parser`_
 - `filelock`_
+- `flask`_ (for web interface)
 - `html2text`_
 - `html5-parser`_
 - `msgpack`_
 - `odfpy`_
 - `pillow`_
 - `python-dateutil`_
+- `reportlab`_ (for PDF generation with Chinese support)
 - `setuptools`_
 - `tinycss`_
 
@@ -100,6 +110,7 @@ Output formats
 
 Currently, following formats are supported:
 
+- **Adobe Portable Document Format (``pdf``)** - with full Chinese character support (Kaiti font), CSS formatting preservation (colors, alignment, indentation, font styles)
 - Broadband eBooks (shortened as BBeB) (``lrf``)
 - EPUB v2 (``epub``)
 - Mobipocket (``mobi``)
@@ -125,11 +136,64 @@ managers), i.e:
    (venv) $ cd ebook-converter
    (venv) $ pip install .
 
-Simple as that. And from now on, you can issue converter:
+Simple as that. And from now on, you can use the converter.
+
+
+Usage
+-----
+
+Command Line Mode
+~~~~~~~~~~~~~~~~~
+
+Traditional command-line conversion:
 
 .. code:: shell-session
 
    (venv) $ ebook-converter book.docx book.lrf
+   (venv) $ ebook-converter book.mobi book.pdf
+
+Web Interface Mode
+~~~~~~~~~~~~~~~~~~
+
+For a more user-friendly experience with drag-and-drop support:
+
+.. code:: shell-session
+
+   (venv) $ ebook-convert      # Start the web server
+   (venv) $ ebook-stop         # Stop the web server
+   (venv) $ ebook-status       # Check server status
+
+The web interface will automatically open in your browser at ``http://127.0.0.1:5001``.
+
+Features of the web interface:
+
+- **Single File Conversion**: Drag and drop files with instant conversion
+- **Batch Conversion**: Convert multiple files at once
+- **Format Support**: All input/output formats supported
+- **Chinese Support**: Proper handling of Chinese filenames and content
+- **PDF Features**: High-quality PDF output with Chinese fonts (Kaiti) and CSS formatting preservation
+
+For detailed web interface documentation, see `WEB_INTERFACE.md`_.
+
+
+PDF Conversion Features
+~~~~~~~~~~~~~~~~~~~~~~~
+
+When converting to PDF format, the converter provides:
+
+- **Chinese Font Support**: Built-in Kaiti (楷体) font for proper Chinese character rendering
+- **CSS Formatting Preservation**:
+  
+  - Text colors (from CSS ``color`` property)
+  - Text alignment (``text-align``: left, center, right, justify)
+  - Text indentation (``text-indent``)
+  - Margins (``margin``, ``margin-left``, etc.)
+  - Font sizes (supports em, pt, px units and named sizes)
+  - Font families and styles (bold, italic)
+
+- **Cover Images**: Automatically includes book covers with proper sizing
+- **Chapter Breaks**: Maintains chapter structure with page breaks
+- **Unicode Filenames**: Properly handles Chinese and other Unicode characters in filenames
 
 
 License
@@ -155,3 +219,6 @@ for details.
 .. _python-dateutil: https://github.com/dateutil/dateutil
 .. _setuptools: https://setuptools.pypa.io
 .. _tinycss: http://tinycss.readthedocs.io
+.. _flask: https://flask.palletsprojects.com
+.. _reportlab: https://www.reportlab.com/opensource/
+.. _WEB_INTERFACE.md: WEB_INTERFACE.md
