@@ -1,5 +1,9 @@
 # 电子书转换器 (Ebook Converter)
 
+**Language / 语言**: [English](README.rst) | [中文](README-CN.md)
+
+---
+
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10+-green.svg)](https://www.python.org)
 

@@ -2,6 +2,10 @@
 Ebook converter
 ===============
 
+**Language / 语言**: `English <README.rst>`_ | `中文 <README-CN.md>`_
+
+---
+
 This is an impudent ripoff of the bits from `Calibre project`_, and is aimed
 only for converter thing.
 
